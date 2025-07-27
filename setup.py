@@ -32,6 +32,8 @@ def get_extensions():
     sources = [str(cpp) for cpp in (SCRIPT_DIR / LIB_NAME / "csrc").glob("*.cpp")]
     cuda_sources = [str(cu) for cu in (SCRIPT_DIR / LIB_NAME / "csrc/cuda").glob("*.cu")]
 
+    print("Found CUDA sources: ", cuda_sources)
+
     ext_module = [
         cpp_extension.CUDAExtension(
             f"{LIB_NAME}._C",

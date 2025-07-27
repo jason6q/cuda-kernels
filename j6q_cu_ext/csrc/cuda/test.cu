@@ -16,11 +16,10 @@ namespace j6q_cu_ext {
 }
 
 at::Tensor test_cuda(const at::Tensor& a, const at::Tensor& b){
-    //TORCH_CHECK(a.sizes() == b.sizes())
-    //TORCH_CHECK(a.dtypes() == at::kFloat)
-    //TORCH_CHECK(b.dtypes() == at::kFloat)
-    //TORCH_INTERNAL_ASSERT(a.device().type == at::DeviceType::CUDA)
-    //TORCH_INTERNAL_ASSERT(b.device().type == at::DeviceType::CUDA)
+    TORCH_CHECK(a.dtype() == at::kFloat)
+    TORCH_CHECK(b.dtype() == at::kFloat)
+    TORCH_INTERNAL_ASSERT(a.device().type() == at::DeviceType::CUDA)
+    TORCH_INTERNAL_ASSERT(b.device().type() == at::DeviceType::CUDA)
 
     at::Tensor a_contig = a.contiguous();
     at::Tensor b_contig = b.contiguous();
@@ -37,8 +36,7 @@ at::Tensor test_cuda(const at::Tensor& a, const at::Tensor& b){
     return c;
 }
 
-// Use TORCH_LIBRARY macro to define a schema string for the operator.
-TORCH_LIBRARY(j6q_cu_ext, m){
+TORCH_LIBRARY_FRAGMENT(j6q_cu_ext, m){
     m.def("test(Tensor a, Tensor b) -> Tensor");
 }
 
