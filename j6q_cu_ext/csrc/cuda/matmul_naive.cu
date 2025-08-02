@@ -18,8 +18,8 @@ namespace j6q_cu_ext{
 
         if(x < n && y < m){
             float sum = 0.f;
-            for(int i = 0; i < k; i++){
-                sum  += a[y*n + k] * b[k*m + x];
+            for(int i = 0; i < k; ++i){
+                sum  += a[y*k + i] * b[i*n + x];
             }
             c[y*n + x] = sum;
         }
@@ -44,7 +44,7 @@ at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
     at::Tensor c = torch::empty({m,n}, a_contig.options());
 
     const float* a_ptr = a_contig.data_ptr<float>();
-    const float* b_ptr = a_contig.data_ptr<float>();
+    const float* b_ptr = b_contig.data_ptr<float>();
     float* c_ptr = c.data_ptr<float>();
 
     dim3 blockDim(16,16);
