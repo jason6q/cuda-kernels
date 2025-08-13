@@ -24,6 +24,10 @@ namespace j6q_cu_ext{
             c[y*n + x] = sum;
         }
     }
+
+    __global__ void matmul_naive_backward_kernel(){
+
+    }
 }
 
 at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
@@ -55,10 +59,19 @@ at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
     return c;
 }
 
+std::tuple<at::Tensor, at::Tensor> matmul_naive_backward(
+    const at::Tensor& grad_out, const at::Tensor& a, const at::Tensor& b, const at::Tensor& out){
+
+    return {a,b};
+}
+
+
 TORCH_LIBRARY_FRAGMENT(j6q_cu_ext, m){
     m.def("matmul_naive(Tensor a, Tensor b) -> Tensor");
+    m.def("matmul_naive_backward(Tensor grad_out, Tensor a, Tensor b, Tensor out)");
 }
 
 TORCH_LIBRARY_IMPL(j6q_cu_ext, CUDA, m){
     m.impl("matmul_naive", &matmul_naive);
+    m.impl("matmul_naive_backward", &matmul_naive_backward);
 }

@@ -1,5 +1,6 @@
 import torch
 from torch import Tensor
+from torch.library import register_fake, register_autograd
 
 __all__ = ["test", "matmul_naive"]
 
@@ -13,9 +14,22 @@ def matmul_naive(a: Tensor, b: Tensor) -> Tensor:
     """
     """
     return torch.ops.j6q_cuda_ext.matmul_naive.default(a,b)
+
+def matmul_naive_backward(ctx, grad_out):
+    x,w,out = ctx.saved_tensors
+
+    with torch.no_grad():
+        a,b = torch.ops.j6q_cuda_ext.matmul_naive_backward(grad_out,x,w,out)
+    return a ,b
+
+def setup_context(ctx, inputs, output):
+    # Setup anything we want to use in the backward pass here.
+    x, w = inputs
+    ctx.save_for_backward(x,w,output)
+
     
 # Helps torch know the metadata of the input/outputs of the tensor like shape, stride, etc...
-@torch.library.register_fake("j6q_cu_ext::test")
+@register_fake("j6q_cu_ext::test")
 def _(a,b):
     torch._check(a.shape == b.shape)
     torch._check(a.dtype == torch.float)
@@ -23,7 +37,7 @@ def _(a,b):
     torch._check(a.device == b.device)
     return torch.empty_like(a)
 
-@torch.library.register_fake("j6q_cu_ext::matmul_naive")
+@register_fake("j6q_cu_ext::matmul_naive")
 def _(a,b):
     # TODO: Support arbitrary matmul shape.
     torch._check(a.shape[1] == b.shape[0])
@@ -31,3 +45,7 @@ def _(a,b):
     torch._check(b.dtype == torch.float)
     torch._check(a.device == b.device)
     return torch.empty((a.shape[0], b.shape[1]), device=a.device)
+
+register_autograd("j6q_cu_ext::matmul_naive_backward",
+                backward=matmul_naive_backward,
+                setup_context=setup_context)
