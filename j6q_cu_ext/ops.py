@@ -25,8 +25,9 @@ def _(a,b):
 
 @torch.library.register_fake("j6q_cu_ext::matmul_naive")
 def _(a,b):
-    torch._check(a.shape == b.shape)
+    # TODO: Support arbitrary matmul shape.
+    torch._check(a.shape[1] == b.shape[0])
     torch._check(a.dtype == torch.float)
     torch._check(b.dtype == torch.float)
     torch._check(a.device == b.device)
-    return torch.empty_like(a)
+    return torch.empty((a.shape[0], b.shape[1]), device=a.device)
