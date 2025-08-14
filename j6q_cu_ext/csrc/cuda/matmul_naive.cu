@@ -68,7 +68,7 @@ std::tuple<at::Tensor, at::Tensor> matmul_naive_backward(
 
 TORCH_LIBRARY_FRAGMENT(j6q_cu_ext, m){
     m.def("matmul_naive(Tensor a, Tensor b) -> Tensor");
-    m.def("matmul_naive_backward(Tensor grad_out, Tensor a, Tensor b, Tensor out)");
+    m.def("matmul_naive_backward(Tensor grad_out, Tensor a, Tensor b, Tensor out) -> (Tensor, Tensor)");
 }
 
 TORCH_LIBRARY_IMPL(j6q_cu_ext, CUDA, m){

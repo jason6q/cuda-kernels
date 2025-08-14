@@ -19,3 +19,5 @@ if __name__ == '__main__':
         result = torch.ops.j6q_cu_ext.matmul_naive(*args)
         expected = reference_matmul(*args)
         assert_close(result, expected)
+
+        result.backward()
