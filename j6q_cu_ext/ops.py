@@ -8,25 +8,22 @@ def test(a: Tensor, b:Tensor) -> Tensor:
     """
         Run the test kernel.
     """
-    return torch.ops.j6q_cuda_ext.test.default(a,b)
+    return torch.ops.j6q_cu_ext.test.default(a,b)
 
 def matmul_naive(a: Tensor, b: Tensor) -> Tensor:
     """
     """
-    return torch.ops.j6q_cuda_ext.matmul_naive.default(a,b)
+    return torch.ops.j6q_cu_ext.matmul_naive.default(a,b)
 
 def matmul_naive_backward(ctx, grad_out):
     x,w,out = ctx.saved_tensors
-
-    with torch.no_grad():
-        a,b = torch.ops.j6q_cuda_ext.matmul_naive_backward(grad_out,x,w,out)
+    a,b = torch.ops.j6q_cu_ext.matmul_naive_backward(grad_out,x,w,out)
     return a ,b
 
-def setup_context(ctx, inputs, output):
+def matmul_naive_setup_ctx(ctx, inputs, output):
     # Setup anything we want to use in the backward pass here.
     x, w = inputs
     ctx.save_for_backward(x,w,output)
-
     
 # Helps torch know the metadata of the input/outputs of the tensor like shape, stride, etc...
 @register_fake("j6q_cu_ext::test")
@@ -46,6 +43,9 @@ def _(a,b):
     torch._check(a.device == b.device)
     return torch.empty((a.shape[0], b.shape[1]), device=a.device)
 
-register_autograd("j6q_cu_ext::matmul_naive_backward",
-                backward=matmul_naive_backward,
-                setup_context=setup_context)
+@register_fake("j6q_cu_ext::matmul_naive_backward")
+def _(grad_out, a, b, out):
+    return a.new_empty(a.shape), b.new_empty(b.shape)
+
+register_autograd("j6q_cu_ext::matmul_naive", matmul_naive_backward,
+                setup_context=matmul_naive_setup_ctx)

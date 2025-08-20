@@ -61,7 +61,6 @@ at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
 
 std::tuple<at::Tensor, at::Tensor> matmul_naive_backward(
     const at::Tensor& grad_out, const at::Tensor& a, const at::Tensor& b, const at::Tensor& out){
-
     return {a,b};
 }
 
