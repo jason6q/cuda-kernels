@@ -38,8 +38,7 @@ def _(a,b):
 def _(a,b):
     # TODO: Support arbitrary matmul shape.
     torch._check(a.shape[1] == b.shape[0])
-    torch._check(a.dtype == torch.float)
-    torch._check(b.dtype == torch.float)
+    torch._check(a.dtype == b.dtype)
     torch._check(a.device == b.device)
     return torch.empty((a.shape[0], b.shape[1]), device=a.device)
 

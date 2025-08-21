@@ -3,6 +3,7 @@
     and indexing directly from global.
 */
 #include <ATen/Operators.h>
+#include <ATen/ATen.h>
 #include <torch/all.h>
 #include <torch/library.h>
 
@@ -11,13 +12,14 @@
 #include <ATen/cuda/CUDAContext.h>
 
 namespace j6q_cu_ext{
-    __global__ void matmul_naive_kernel(const float* a, const float* b, float* c, int m, int k, int n){
+    template<typename scalar_t>
+    __global__ void matmul_naive_kernel(const scalar_t* a, const scalar_t* b, scalar_t* c, int m, int k, int n){
         // MxK, KxN = MxN
         int x = (blockDim.x * blockIdx.x) + threadIdx.x;
         int y = (blockDim.y * blockIdx.y) + threadIdx.y;
 
         if(x < n && y < m){
-            float sum = 0.f;
+            scalar_t sum = scalar_t(0);
             for(int i = 0; i < k; ++i){
                 sum  += a[y*k + i] * b[i*n + x];
             }
@@ -36,8 +38,7 @@ at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
     int n = b.size(1);
 
     //TORCH_CHECK(a.size(1) == b.size(0), "Number of columns of a must equal number of rows of b."));
-    TORCH_CHECK(a.dtype() == at::kFloat, "a must be float");
-    TORCH_CHECK(b.dtype() == at::kFloat, "b must be float");
+    TORCH_CHECK(a.scalar_type() == b.scalar_type(), "Dtype mismatch between a and b")
     TORCH_INTERNAL_ASSERT(a.device().type() == at::DeviceType::CUDA);
     TORCH_INTERNAL_ASSERT(b.device().type() == at::DeviceType::CUDA);
 
@@ -47,15 +48,18 @@ at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
     at::Tensor b_contig = b.contiguous();
     at::Tensor c = torch::empty({m,n}, a_contig.options());
 
-    const float* a_ptr = a_contig.data_ptr<float>();
-    const float* b_ptr = b_contig.data_ptr<float>();
-    float* c_ptr = c.data_ptr<float>();
 
     dim3 blockDim(16,16);
     dim3 gridDim((n + 15) / 16, (m + 15) / 16);
 
     cudaStream_t stream = at::cuda::getCurrentCUDAStream();
-    j6q_cu_ext::matmul_naive_kernel<<<gridDim, blockDim, 0>>>(a_ptr, b_ptr, c_ptr, m, k, n);
+    AT_DISPATCH_FLOATING_TYPES(a.scalar_type(), "matmul_naive", [&]{
+        const scalar_t* a_ptr = a_contig.data_ptr<scalar_t>();
+        const scalar_t* b_ptr = b_contig.data_ptr<scalar_t>();
+        scalar_t* c_ptr = c.data_ptr<scalar_t>();
+        j6q_cu_ext::matmul_naive_kernel<scalar_t><<<gridDim, blockDim, 0>>>(a_ptr, b_ptr, c_ptr, m, k, n);
+        C10_CUDA_KERNEL_LAUNCH_CHECK();
+    });
     return c;
 }
 

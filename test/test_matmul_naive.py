@@ -13,15 +13,21 @@ def reference_matmul(a,b):
 if __name__ == '__main__':
     device = torch.device("cuda:0")
     samples = sample_2d_inputs(device, requires_grad=True)
-    for args in samples:
-        opcheck(torch.ops.j6q_cu_ext.matmul_naive.default, args)
 
-        result = torch.ops.j6q_cu_ext.matmul_naive(*args)
+    _matmul_naive = torch.ops.j6q_cu_ext.matmul_naive
+
+    for args in samples:
+        opcheck(_matmul_naive.default, args)
+
+        result = _matmul_naive(*args)
         expected = reference_matmul(*args)
         assert_close(result, expected)
 
         # Create a scalar output from this.
         # TODO: Support batched.
-        result = result.mean()
 
+        args = [a.to(torch.double) for a in args]
+        result = _matmul_naive(*args)
+        result = result.mean()
         result.backward()
+        gradcheck(_matmul_naive, args, eps=1e-6)
