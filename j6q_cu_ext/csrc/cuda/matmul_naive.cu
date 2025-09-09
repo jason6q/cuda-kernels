@@ -27,8 +27,16 @@ namespace j6q_cu_ext{
         }
     }
 
-    __global__ void matmul_naive_backward_kernel(){
+    template<typename scalar_t>
+    __global__ void matmul_naive_backward_kernel(
+        const scalar_t* grad_out, const scalar_t* a, const scalar_t* b, 
+        scalar_t* da, scalar_t* db, int m, int k, int n){
 
+            // Calculate grad a
+
+            // Calculate grad b
+
+            // Multiply Grad out
     }
 }
 
@@ -48,7 +56,6 @@ at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
     at::Tensor b_contig = b.contiguous();
     at::Tensor c = torch::empty({m,n}, a_contig.options());
 
-
     dim3 blockDim(16,16);
     dim3 gridDim((n + 15) / 16, (m + 15) / 16);
 
@@ -65,9 +72,43 @@ at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
 
 std::tuple<at::Tensor, at::Tensor> matmul_naive_backward(
     const at::Tensor& grad_out, const at::Tensor& a, const at::Tensor& b, const at::Tensor& out){
-    return {a,b};
-}
+    int m = a.size(0);
+    int k = a.size(1);
+    int n = b.size(1);
 
+    //TORCH_CHECK(a.size(1) == b.size(0), "Number of columns of a must equal number of rows of b."));
+    TORCH_CHECK(a.scalar_type() == b.scalar_type(), "Dtype mismatch between a and b")
+    TORCH_INTERNAL_ASSERT(a.device().type() == at::DeviceType::CUDA);
+    TORCH_INTERNAL_ASSERT(b.device().type() == at::DeviceType::CUDA);
+
+    TORCH_CHECK(b.size(0) == k, "Rows of a must equal columns of b");
+
+    at::Tensor a_contig = a.contiguous();
+    at::Tensor b_contig = b.contiguous();
+    at::Tensor grad_out_contig = grad_out.contiguous();
+
+    at::Tensor da = torch::empty({m,n}, a_contig.options());
+    at::Tensor db = torch::empty({m,n}, a_contig.options());
+
+    dim3 blockDim(16,16);
+    dim3 gridDim((n + 15) / 16, (m + 15) / 16);
+
+    cudaStream_t stream = at::cuda::getCurrentCUDAStream();
+    AT_DISPATCH_FLOATING_TYPES(a.scalar_type(), "matmul_naive", [&]{
+        const scalar_t* a_ptr = a_contig.data_ptr<scalar_t>();
+        const scalar_t* b_ptr = b_contig.data_ptr<scalar_t>();
+        const scalar_t* grad_out_ptr = grad_out_contig.data_ptr<scalar_t>();
+
+        scalar_t* da_ptr = da.data_ptr<scalar_t>();
+        scalar_t* db_ptr = db.data_ptr<scalar_t>();
+
+        j6q_cu_ext::matmul_naive_backward_kernel<scalar_t><<<gridDim, blockDim, 0>>>(
+            grad_out_ptr, a_ptr, b_ptr, da_ptr, db_ptr, m, k, n);
+        C10_CUDA_KERNEL_LAUNCH_CHECK();
+    });
+
+    return {da, db};
+}
 
 TORCH_LIBRARY_FRAGMENT(j6q_cu_ext, m){
     m.def("matmul_naive(Tensor a, Tensor b) -> Tensor");
