@@ -28,15 +28,27 @@ namespace j6q_cu_ext{
     }
 
     template<typename scalar_t>
-    __global__ void matmul_naive_backward_kernel(
-        const scalar_t* grad_out, const scalar_t* a, const scalar_t* b, 
-        scalar_t* da, scalar_t* db, int m, int k, int n){
+    __global__ void matmul_naive_gradA_kernel(
+        const scalar_t* grad_out, const scalar_t* b, scalar_t* da, int m, int k, int n){
+            int x = (blockDim.x * blockIdx.x) + threadIdx.x;
+            int y = (blockDim.y * blockIdx.y) + threadIdx.y;
 
-            // Calculate grad a
+            if(x < n && y < m) return;
 
-            // Calculate grad b
+            scalar_t sum = scalar_t(0);
+            for(int i = 0; i < k; i++){
+            }
+            da[y*n + x] = sum;
+    }
 
-            // Multiply Grad out
+    template<typename scalar_t>
+    __global__ void matmul_naive_gradB_kernel(
+        const scalar_t* grad_out, const scalar_t* a, scalar_t* db, int m, int k, int n){
+            int x = (blockDim.x * blockIdx.x) + threadIdx.x;
+            int y = (blockDim.y * blockIdx.y) + threadIdx.y;
+
+            if(x < n && y < m) return;
+            db[y*n + x] = 0;
     }
 }
 
@@ -102,8 +114,12 @@ std::tuple<at::Tensor, at::Tensor> matmul_naive_backward(
         scalar_t* da_ptr = da.data_ptr<scalar_t>();
         scalar_t* db_ptr = db.data_ptr<scalar_t>();
 
-        j6q_cu_ext::matmul_naive_backward_kernel<scalar_t><<<gridDim, blockDim, 0>>>(
-            grad_out_ptr, a_ptr, b_ptr, da_ptr, db_ptr, m, k, n);
+        j6q_cu_ext::matmul_naive_gradA_kernel<scalar_t><<<gridDim, blockDim, 0>>>(
+            grad_out_ptr, b_ptr, da_ptr, m, k, n);
+        C10_CUDA_KERNEL_LAUNCH_CHECK();
+
+        j6q_cu_ext::matmul_naive_gradB_kernel<scalar_t><<<gridDim, blockDim, 0>>>(
+            grad_out_ptr, a_ptr, db_ptr, m, k, n);
         C10_CUDA_KERNEL_LAUNCH_CHECK();
     });
 

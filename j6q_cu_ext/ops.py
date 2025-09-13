@@ -18,7 +18,7 @@ def matmul_naive(a: Tensor, b: Tensor) -> Tensor:
 def matmul_naive_backward(ctx, grad_out):
     x,w,out = ctx.saved_tensors
     a,b = torch.ops.j6q_cu_ext.matmul_naive_backward(grad_out,x,w,out)
-    return a ,b
+    return a, b
 
 def matmul_naive_setup_ctx(ctx, inputs, output):
     # Setup anything we want to use in the backward pass here.
