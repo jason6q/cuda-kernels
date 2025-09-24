@@ -80,7 +80,7 @@ at::Tensor matmul_naive(const at::Tensor& a, const at::Tensor& b){
 
     TORCH_CHECK(b.size(0) == k, "Rows of a must equal columns of b");
 
-    at::Tensor a_contig = a.contiguous();
+    at::Tensor a_contig = a.contiguous(); // If already contiguous this is a no-op
     at::Tensor b_contig = b.contiguous();
     at::Tensor c = torch::empty({m,n}, a_contig.options());
 
