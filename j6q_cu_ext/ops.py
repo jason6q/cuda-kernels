@@ -63,20 +63,18 @@ register_autograd("j6q_cu_ext::matmul_naive", matmul_naive_backward,
 def maxpool2d_naive(a:Tensor, size: int):
     pass
 
-def maxpool2d_naive_backward(ctx, grad_out):
-    pass
+#def maxpool2d_naive_setup_ctx(ctx, inputs, outputs):
+#    return
 
-def maxpool2d_naive_setup_ctx(ctx, inputs, outputs):
-    return
-
+#def maxpool2d_naive_backward(ctx, grad_out):
+#    pass
 
 @register_fake("j6q_cu_ext::maxpool2d_naive")
-def _(a,b):
-    # TODO: Support arbitrary matmul shape.
+def _(a, stride):
     return torch.empty(a.shape, device=a.device)
 
-@register_fake("j6q_cu_ext::maxpool2d_naive_backward")
-def _(a,b):
-    return torch.empty(a.shape, device=a.device)
-
-register_autograd("j6q_cu_ext::maxpool2d_naive", maxpool2d_naive_backward, setup_context=maxpool2d_naive_setup_ctx)
+#@register_fake("j6q_cu_ext::maxpool2d_naive_backward")
+#def _(a,b):
+#    return torch.empty(a.shape, device=a.device)
+#
+#register_autograd("j6q_cu_ext::maxpool2d_naive", maxpool2d_naive_backward, setup_context=maxpool2d_naive_setup_ctx)

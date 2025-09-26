@@ -20,11 +20,14 @@ pip install -r requirements.txt
 
 ### Dependencies
 ...
-
 CUTLASS
 NVTX
 
-### Build Extension
+### Building the C++ (Torch Agnostic) Extension
+```
+```
+
+### Building the PyTorch Extension
 ```
 pip install --no-build-isolation -e .
 ```
@@ -49,6 +52,17 @@ deviceQuery
 |Number of CUDA Cores| 10752|
 |Number of Tensor Cores| 336|
 |Size of Memory| 48GB|
+
+## Adding a new CUDA kernel
+Every kernel needs to have the following files created.
+```
+src/<KERNEL>.cu
+cu_tests/<KERNEL>.cpp
+torch_tests/<KERNEL>.py
+```
+
+You'll need to define the kernel prototypes in `includes/kernels.h`
+
 
 ## Creating a Custom C++/CUDA Extension for PyTorch
 Instructions to integrate all kernels into PyTorch's codebase. 
