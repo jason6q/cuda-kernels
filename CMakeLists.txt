@@ -21,6 +21,7 @@ set(INCLUDES_DIR
 file(GLOB TESTS "tests/*.cpp")
 set(SOURCES
     src/matmul_naive.cu
+    src/data_ptr.cpp
 )
 
 # CMakeLists.txt
@@ -51,9 +52,7 @@ foreach(test_src ${TEST_SOURCES})
 
     # Create an executable per test
     add_executable(${test_name} ${test_src})
-
-    # Specify where headers are located.
-    target_include_directories(${test_name} PUBLIC ${INCLUDES_DIR})
+    target_link_libraries(${test_name} PRIVATE jq_kernels)
 
     # Link libraries your tests need
     target_link_libraries(${test_name} PRIVATE CUDA::cudart)

@@ -5,8 +5,6 @@
 
 #include "tensor.h"
 
-#include "cuda/cudart.h"
-
 namespace jq{
 
     /*
@@ -22,12 +20,12 @@ namespace jq{
             static DataPtr cpu(std::size_t bytes, bool zero, std::size_t align);
             static DataPtr cuda(std::size_t bytes, bool zero, void* stream); // Type-erasure on strema, but will use cudaStream_t
 
+            // TODO: Add get
             Device device(){ return device_; }
             std::size_t size(){ return size_; }
-            std::size_t align(){ return align_;}
 
         private:
-            DataPtr(Device d, std::shared_ptr<void> ptr, std::size_t bytes, std::size_t align)
+            DataPtr(Device d, std::shared_ptr<void> ptr, std::size_t bytes)
             : device_(d), ptr_(ptr), size_(bytes) {}
             // Use shared_ptr<void> for type-erasure. That way
             // we only instantiate one instance.

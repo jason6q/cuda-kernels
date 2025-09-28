@@ -1,5 +1,7 @@
 #include <memory>
 #include <cstddef>
+#include <cuda_runtime.h>
+#include <cstring>
 
 #include "data_ptr.h"
 #include "tensor.h"
@@ -16,11 +18,11 @@ namespace jq{
         // Instantiate shared_ptr with CPU lambda deleter
         // Ownership of buf to shared_ptr
         auto s_ptr = std::shared_ptr<void>(buf, [align](void *q){
-            ::operator delete(buf, std::align_val_t(align));
+            ::operator delete(q, std::align_val_t(align));
         });
 
 
-        DataPtr{Device::CPU, std::move(s_ptr), bytes, align};
+        return DataPtr{Device::CPU, std::move(s_ptr), bytes};
     }
 
     DataPtr DataPtr::cuda(std::size_t bytes, bool zero, void* stream){
@@ -29,15 +31,15 @@ namespace jq{
         cudaMalloc(&buf, bytes); // Automatically aligned >256B
 
         if(zero){
-            cudaMemsetAsync(buf, 0, bytes, static_cast<cudaStream_t> stream)
+            cudaMemsetAsync(buf, 0, bytes, static_cast<cudaStream_t>(stream));
         }
 
         // Instantiate shared_ptr with CUDA lambda deleter
         // Ownership of buf to shared_ptr
-        auto s_ptr = std::shared_ptr<void>(buf, [align](void *q){
-            cudaFree(buf);
+        auto s_ptr = std::shared_ptr<void>(buf, [=](void *q){
+            cudaFree(q);
         });
 
-        DataPtr{Device::CUDA, std::move(s_ptr), bytes, align};
+        return DataPtr{Device::CPU, std::move(s_ptr), bytes};
     }
 }
