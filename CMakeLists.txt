@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.30)
+
 project(jq_kernels LANGUAGES CXX CUDA)
 
 # C++ Settings
@@ -16,9 +18,13 @@ set(INCLUDES_DIR
 )
 
 # Add source files
+file(GLOB TESTS "tests/*.cpp")
 set(SOURCES
     src/matmul_naive.cu
 )
+
+# CMakeLists.txt
+file(GLOB TEST_SOURCES tests/*.cpp)
 
 # Build shared library
 add_library(jq_kernels SHARED ${SOURCES})
@@ -35,3 +41,27 @@ find_package(Torch REQUIRED)
 target_link_libraries(jq_kernels PRIVATE ${TORCH_LIBRARIES})
 set_property(TARGET jq_kernels PROPERTY CXX_STANDARD 17)
 set_property(TARGET jq_kernels PROPERTY CUDA_STANDARD 17)
+
+# Build Test cases
+file(GLOB TEST_SOURCES cu_tests/*.cpp)
+
+foreach(test_src ${TEST_SOURCES})
+    # Get the filename without extension
+    get_filename_component(test_name ${test_src} NAME_WE)
+
+    # Create an executable per test
+    add_executable(${test_name} ${test_src})
+
+    # Specify where headers are located.
+    target_include_directories(${test_name} PUBLIC ${INCLUDES_DIR})
+
+    # Link libraries your tests need
+    target_link_libraries(${test_name} PRIVATE CUDA::cudart)
+    target_link_libraries(${test_name} PRIVATE ${TORCH_LIBRARIES})
+
+    set_property(TARGET ${test_name} PROPERTY CXX_STANDARD 17)
+    set_property(TARGET ${test_name} PROPERTY CUDA_STANDARD 17)
+
+    # Register with CTest
+    #add_test(NAME ${test_name} COMMAND ${test_name})
+endforeach()
