@@ -9,35 +9,42 @@
 #include <cstdint>
 #include <optional>
 
+#include "data_ptr.h"
+#include "device.h"
 namespace jq{
-    enum DType: int32_t { 
-        FP32=0 
-    };
+    /**
+     * Try to have this mimic the ATen Tensor minimally.
+     **/
+    class Tensor{
+        public:
+            Tensor(const std::vector<int32_t>& shape, 
+                DType dtype = DType::FP32, 
+                Device device = Device::CPU);
 
-    enum Device: int32_t {
-        CPU=0,
-        CUDA=1
-    };
+            // Getters
+            const DataPtr& data_ptr() const { return data_ptr_; }
+            const std::vector<int32_t>& shape() const { return shape_; }
+            DType dtype() const { return dtype_; }
+            Device device() const { return device_; }
 
-    // Try to have this mimic the ATen Tensor minimally.
-    struct Tensor{
-        void *data_ptr;
-        int64_t sizes[4];
-
-        // Might migrate this to TensorOptions like in Torch.
-        DType dtype;
-        Device device;
+        private:
+            // Order matters here since data_ptr_ depends on its above member
+            // variables during default construction.
+            std::vector<int32_t> shape_;
+            DType dtype_;
+            Device device_;
+            size_t nbytes_;
+            DataPtr data_ptr_;
     };
 
     Tensor empty(
-        std::vector<int32_t> shape, 
-        std::optional<DType> dtype = DType::FP32,
-        std::optional<Device> device = Device::CPU
+        const std::vector<int32_t>& shape, 
+        std::optional<DType> dtype = std::nullopt,
+        std::optional<Device> device = std::nullopt
     );
     Tensor random_uniform(
-        std::vector<int32_t> shape, 
-        std::optional<DType> dtype = DType::FP32, 
-        std::optional<int32_t> seed = std::nullopt,
-        std::optional<Device> device = Device::CPU
-    );
+        const std::vector<int32_t> &shape,
+        std::optional<DType> dtype = std::nullopt,
+        std::optional<int64_t> seed = std::nullopt,
+        std::optional<Device> device = std::nullopt);
 }

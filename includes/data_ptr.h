@@ -1,12 +1,16 @@
+/**
+ * Custom Data Pointer class to be used with a Tensor class.
+ * Mainly just for managing a smart pointer with different
+ * deallocation methods based off hardware.
+ */
 #pragma once
 
 #include <memory>
 #include <cstddef>
 
-#include "tensor.h"
+#include "device.h"
 
 namespace jq{
-
     /*
         Contains smart pointer to memory buffer
         and manages allocation/deallocation for CPU
@@ -18,9 +22,9 @@ namespace jq{
     class DataPtr{
         public:
             static DataPtr cpu(std::size_t bytes, bool zero, std::size_t align);
-            static DataPtr cuda(std::size_t bytes, bool zero, void* stream); // Type-erasure on strema, but will use cudaStream_t
+            static DataPtr cuda(std::size_t bytes, bool zero); // Type-erasure on stream, but will use cudaStream_t
 
-            // TODO: Add get
+            void* get(){ return ptr_.get(); }
             Device device(){ return device_; }
             std::size_t size(){ return size_; }
 

@@ -19,12 +19,20 @@ pip install -r requirements.txt
 ```
 
 ### Dependencies
-...
+TODO: Add these dependencies
+```
+DLPack
 CUTLASS
 NVTX
+CuDNN
+```
 
 ### Building the C++ (Torch Agnostic) Extension
+Just run the build script. Make sure to modify the flags
+inside it for CUDA_ARCH support and where the torch
+library is installed.
 ```
+./build.sh
 ```
 
 ### Building the PyTorch Extension

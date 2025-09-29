@@ -25,10 +25,13 @@ namespace jq{
         return DataPtr{Device::CPU, std::move(s_ptr), bytes};
     }
 
-    DataPtr DataPtr::cuda(std::size_t bytes, bool zero, void* stream){
+    DataPtr DataPtr::cuda(std::size_t bytes, bool zero){
         // Allocate memory and ptr
         void* buf;
         cudaMalloc(&buf, bytes); // Automatically aligned >256B
+
+        // TODO: Grab correct stream
+        cudaStream_t stream = cudaStreamDefault;
 
         if(zero){
             cudaMemsetAsync(buf, 0, bytes, static_cast<cudaStream_t>(stream));
