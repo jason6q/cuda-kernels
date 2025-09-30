@@ -24,6 +24,8 @@ namespace jq{
             static DataPtr cpu(std::size_t bytes, bool zero, std::size_t align);
             static DataPtr cuda(std::size_t bytes, bool zero); // Type-erasure on stream, but will use cudaStream_t
 
+            void to(Device device);
+
             void* get(){ return ptr_.get(); }
             Device device(){ return device_; }
             std::size_t size(){ return size_; }
@@ -42,5 +44,8 @@ namespace jq{
             std::size_t size_;
 
             Device device_;
+
+            // For CPU only.
+            std::size_t align = 64;
     };
 }

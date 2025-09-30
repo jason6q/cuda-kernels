@@ -21,6 +21,9 @@ namespace jq{
                 DType dtype = DType::FP32, 
                 Device device = Device::CPU);
 
+            // Move the underlying data to a device.
+            void to(Device device);
+
             // Getters
             const DataPtr& data_ptr() const { return data_ptr_; }
             const std::vector<int32_t>& shape() const { return shape_; }

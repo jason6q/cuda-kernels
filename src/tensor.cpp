@@ -36,6 +36,11 @@ namespace jq {
 
     }
 
+    void Tensor::to(Device device){
+        this->data_ptr_.to(device);
+        this->device_ = device;
+    }
+
     Tensor empty(
         const std::vector<int32_t>& shape, 
         std::optional<DType> dtype,
@@ -53,18 +58,16 @@ namespace jq {
         std::optional<int64_t> seed,
         std::optional<Device> device
     ){
+        Device device_ = device.value_or(Device::CPU);
+        DType dtype_ = dtype.value_or(DType::FP32);
         int32_t seed_num = seed.value_or(42);
+
         std::mt19937 gen(seed_num) ;// Mersenne Twister appears to be highly uniform
 
         // We'll init a CPU tensor than move it to CUDA.
         // TODO: RNG on CUDA variant?
-        jq::Tensor tensor = empty(shape, dtype, device);
+        //jq::Tensor tensor = empty(shape_, dtype_, Device::CPU);
 
-        // Calculate number of bytes
-        size_t size = 1;
-        for(int32_t i = 0; i < shape.size(); ++i){
-            size *= shape[i];
-        }
-        size = size * sizeof(float);
+        //if(device_ == Device::CUDA) tensor.to(device);
     }
 }

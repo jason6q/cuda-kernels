@@ -1,92 +1,84 @@
-cmake_minimum_required(VERSION 3.30)
-
+cmake_minimum_required(VERSION 3.20)  # 3.30 fine too
 project(jq_kernels LANGUAGES CXX CUDA)
 
-# Options
-option(USE_ASAN "Enable AdressSanitizer for C/C++ and CUDA host code" OFF)
-
-function(enable_asan target)
-    if (NOT USE_ASAN)
-    return()
-    endif()
-
-    # Instrument C and C++
-    target_compile_options(${target} PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-fsanitize=address -fno-omit-frame-pointer>
-    $<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address -fno-omit-frame-pointer>)
-
-    # Instrument CUDA host code (device code is unaffected; use compute-sanitizer for that)
-    target_compile_options(${target} PRIVATE
-    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-fsanitize=address,-fno-omit-frame-pointer>)
-
-    # Ensure the linker gets ASan too
-    target_link_options(${target} PRIVATE -fsanitize=address)
-endfunction()
-
-# C++ Settings
+# Standards
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# CUDA Settings
-enable_language(CUDA)
 set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -lineinfo")
 
-# Add include files
-set(INCLUDES_DIR
-    includes/
-)
+# Find Torch and CUDA runtime from Conda
+find_package(Torch REQUIRED)                   
 
-# Add source files
-file(GLOB TESTS "tests/*.cpp")
+# Build lib
+set(INCLUDES_DIR includes/)
 set(SOURCES
-    src/matmul_naive.cu
-    src/data_ptr.cpp
-    src/tensor.cpp
+  src/matmul_naive.cu
+  src/data_ptr.cpp
+  src/tensor.cpp
+)
+add_library(jq_kernels SHARED ${SOURCES})
+target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})
+target_link_libraries(jq_kernels PRIVATE ${TORCH_LIBRARIES} CUDA::cudart)
+set_property(TARGET jq_kernels PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+# Build tests
+file(GLOB TEST_SOURCES cu_tests/*.cpp)
+foreach(test_src ${TEST_SOURCES})
+  get_filename_component(test_name ${test_src} NAME_WE)
+  add_executable(${test_name} ${test_src})
+  target_link_libraries(${test_name} PRIVATE jq_kernels ${TORCH_LIBRARIES} CUDA::cudart)
+endforeach()
+
+# Torch libs live here:
+get_filename_component(TORCH_LIBDIR "${TORCH_LIBRARIES}" DIRECTORY)
+set(TORCH_NVIDIA_ROOT "${TORCH_LIBDIR}/../../nvidia")
+
+# We need to set the RPATH_DIRS here because for whatever
+# reason when building our binaries theres a mix of system versus
+# conda libraries being pulled in.
+# We want to make this as consistent as possible across the board
+# and use the torch libs installed under conda.
+set(RPATH_DIRS
+  "$ENV{CONDA_PREFIX}/lib"
+  "$ENV{CONDA_PREFIX}/lib64"
+  "${TORCH_LIBDIR}"
+  "${TORCH_NVIDIA_ROOT}/cublas/lib"
+  "${TORCH_NVIDIA_ROOT}/cusparse/lib"
+  "${TORCH_NVIDIA_ROOT}/cufft/lib"
+  "${TORCH_NVIDIA_ROOT}/curand/lib"
+  "${TORCH_NVIDIA_ROOT}/cudnn/lib"
+  "${TORCH_NVIDIA_ROOT}/nccl/lib"
+  "${TORCH_NVIDIA_ROOT}/cuda_cupti/lib"
 )
 
-# CMakeLists.txt
-file(GLOB TEST_SOURCES tests/*.cpp)
+# prune non-existent dirs (optional)
+foreach(p IN LISTS RPATH_DIRS)
+  if(NOT EXISTS "${p}")
+    list(REMOVE_ITEM RPATH_DIRS "${p}")
+  endif()
+endforeach()
 
-# Build shared library
-add_library(jq_kernels SHARED ${SOURCES})
+list(JOIN RPATH_DIRS ":" ALL_RPATHS)
 
-# Specify where headers are located.
-target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})
+# Global prefs
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)        # embed at build time
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# Find CUDA runtime
-find_package(CUDAToolkit REQUIRED)
-target_link_libraries(jq_kernels PRIVATE CUDA::cudart)
+# Apply to all targets we made
+set(_targets jq_kernels ${TEST_SOURCES})
 
-# Link Torch
-find_package(Torch REQUIRED)
-target_link_libraries(jq_kernels PRIVATE ${TORCH_LIBRARIES})
-set_property(TARGET jq_kernels PROPERTY CXX_STANDARD 17)
-set_property(TARGET jq_kernels PROPERTY CUDA_STANDARD 17)
-
-enable_asan(jq_kernels)
-
-# Build Test cases
-file(GLOB TEST_SOURCES cu_tests/*.cpp)
-
+# rebuild list of test targets by name
+set(_targets jq_kernels)
 foreach(test_src ${TEST_SOURCES})
-    # Get the filename without extension
-    get_filename_component(test_name ${test_src} NAME_WE)
+  get_filename_component(_t ${test_src} NAME_WE)
+  list(APPEND _targets ${_t})
+endforeach()
 
-    # Create an executable per test
-    add_executable(${test_name} ${test_src})
-    target_link_libraries(${test_name} PRIVATE jq_kernels)
-
-    # Link libraries your tests need
-    target_link_libraries(${test_name} PRIVATE CUDA::cudart)
-    target_link_libraries(${test_name} PRIVATE ${TORCH_LIBRARIES})
-
-    set_property(TARGET ${test_name} PROPERTY CXX_STANDARD 17)
-    set_property(TARGET ${test_name} PROPERTY CUDA_STANDARD 17)
-
-    enable_asan(${test_name})
-
-    # Register with CTest
-    #add_test(NAME ${test_name} COMMAND ${test_name})
+foreach(t ${_targets})
+  set_target_properties(${t} PROPERTIES
+    BUILD_RPATH   "${ALL_RPATHS}"
+    INSTALL_RPATH "${ALL_RPATHS}"
+  )
 endforeach()
