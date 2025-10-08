@@ -8,10 +8,10 @@
 
 int main(int argc, char* argv[]){
     std::vector<int32_t> shape = {10,10};
-    jq::Tensor tensor = jq::empty(shape);
+    jqTen::Tensor tensor = jqTen::empty(shape);
 
-    tensor.to(jq::Device::CUDA);
-    jq::DataPtr data_ptr = tensor.data_ptr(); // WARNING: When you grab the data ptr it must be after the move to CUDA
+    tensor.to(core::Device::CUDA);
+    core::DataPtr data_ptr = tensor.data_ptr(); // WARNING: When you grab the data ptr it must be after the move to CUDA
 
     cudaPointerAttributes attr;
     cudaError_t err = cudaPointerGetAttributes(&attr, data_ptr.get());

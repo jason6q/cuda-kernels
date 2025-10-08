@@ -1,5 +1,5 @@
 #pragma once
-namespace jq{
+namespace core{
     // Forward Declarations
 
     enum DType: int32_t { 

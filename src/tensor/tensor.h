@@ -11,24 +11,24 @@
 
 #include "data_ptr.h"
 #include "device.h"
-namespace jq{
+namespace jqTen{
     /**
      * Try to have this mimic the ATen Tensor minimally.
      **/
     class Tensor{
         public:
             Tensor(const std::vector<int32_t>& shape, 
-                DType dtype = DType::FP32, 
-                Device device = Device::CPU);
+                core::DType dtype = core::DType::FP32, 
+                core::Device device = core::Device::CPU);
 
             // Move the underlying data to a device.
-            void to(Device device);
+            void to(core::Device device);
 
             // Getters
-            const DataPtr& data_ptr() const { return data_ptr_; }
+            const core::DataPtr& data_ptr() const { return data_ptr_; }
             const std::vector<int32_t>& shape() const { return shape_; }
-            DType dtype() const { return dtype_; }
-            Device device() const { return device_; }
+            core::DType dtype() const { return dtype_; }
+            core::Device device() const { return device_; }
 
             // Other
             int32_t numel() const {
@@ -44,20 +44,20 @@ namespace jq{
             // Order matters here since data_ptr_ depends on its above member
             // variables during default construction.
             std::vector<int32_t> shape_;
-            DType dtype_;
-            Device device_;
+            core::DType dtype_;
+            core::Device device_;
             size_t nbytes_;
-            DataPtr data_ptr_;
+            core::DataPtr data_ptr_;
     };
 
     Tensor empty(
         const std::vector<int32_t>& shape, 
-        std::optional<DType> dtype = std::nullopt,
-        std::optional<Device> device = std::nullopt
+        std::optional<core::DType> dtype = std::nullopt,
+        std::optional<core::Device> device = std::nullopt
     );
     Tensor random_uniform(
         const std::vector<int32_t> &shape,
-        std::optional<DType> dtype = std::nullopt,
+        std::optional<core::DType> dtype = std::nullopt,
         std::optional<int64_t> seed = std::nullopt,
-        std::optional<Device> device = std::nullopt);
+        std::optional<core::Device> device = std::nullopt);
 }

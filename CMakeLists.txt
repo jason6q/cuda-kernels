@@ -11,11 +11,14 @@ set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 find_package(Torch REQUIRED)                   
 
 # Build lib
-set(INCLUDES_DIR includes/)
+set(INCLUDES_DIR 
+  src/core/
+  src/tensor/
+  src/tensor/native
+) 
 set(SOURCES
-  src/matmul_naive.cu
-  src/data_ptr.cpp
-  src/tensor.cpp
+  src/core/data_ptr.cpp
+  src/tensor/tensor.cpp
 )
 add_library(jq_kernels SHARED ${SOURCES})
 target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})
@@ -23,7 +26,10 @@ target_link_libraries(jq_kernels PRIVATE ${TORCH_LIBRARIES} CUDA::cudart)
 set_property(TARGET jq_kernels PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Build tests
-file(GLOB TEST_SOURCES cu_tests/*.cpp)
+file(GLOB TEST_SOURCES 
+  src/core/tests/*.cpp
+  src/tensor/tests/*.cpp
+)
 foreach(test_src ${TEST_SOURCES})
   get_filename_component(test_name ${test_src} NAME_WE)
   add_executable(${test_name} ${test_src})

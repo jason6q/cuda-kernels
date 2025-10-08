@@ -10,7 +10,7 @@
 
 #include "device.h"
 
-namespace jq{
+namespace core{
     /*
         Contains smart pointer to memory buffer
         and manages allocation/deallocation for CPU

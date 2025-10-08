@@ -7,8 +7,8 @@
 
 int main(int argc, char* argv[]){
     std::vector<int32_t> shape = {10};
-    jq::Tensor tensor = jq::empty(shape);
-    jq::DataPtr data_ptr = tensor.data_ptr();
+    jqTen::Tensor tensor = jqTen::empty(shape);
+    core::DataPtr data_ptr = tensor.data_ptr();
     float* fptr = static_cast<float*>(data_ptr.get());
     int32_t numel = tensor.numel();
 

@@ -7,8 +7,8 @@
 
 int main(int argc, char* argv[]){
     std::vector<int32_t> shape = {1};
-    jq::Tensor tensor = jq::random_uniform(shape);
-    jq::DataPtr data_ptr = tensor.data_ptr();
+    jqTen::Tensor tensor = jqTen::random_uniform(shape);
+    core::DataPtr data_ptr = tensor.data_ptr();
     float* fptr = static_cast<float*>(data_ptr.get());
 
     /*
