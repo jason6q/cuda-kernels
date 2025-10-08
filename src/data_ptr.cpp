@@ -8,6 +8,8 @@
 #include "data_ptr.h"
 #include "tensor.h"
 
+// TODO: Maybe create a custom deleter class instead.
+
 namespace jq{
     DataPtr DataPtr::cpu(std::size_t bytes, bool zero, std::size_t align){
         // Allocate memory and ptr

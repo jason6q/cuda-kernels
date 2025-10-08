@@ -30,6 +30,16 @@ namespace jq{
             DType dtype() const { return dtype_; }
             Device device() const { return device_; }
 
+            // Other
+            int32_t numel() const {
+                int32_t numel = 1;
+                for(int i = 0; i < shape_.size(); ++i){
+                    numel *= shape_[i];
+                }
+
+                return numel;
+            }
+
         private:
             // Order matters here since data_ptr_ depends on its above member
             // variables during default construction.

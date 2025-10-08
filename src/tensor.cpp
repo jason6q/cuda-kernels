@@ -64,10 +64,26 @@ namespace jq {
 
         std::mt19937 gen(seed_num) ;// Mersenne Twister appears to be highly uniform
 
+        std::uniform_real_distribution<float> dist(0.0,1.0); // TODO: Handle different data types.
+
         // We'll init a CPU tensor than move it to CUDA.
         // TODO: RNG on CUDA variant?
-        //jq::Tensor tensor = empty(shape_, dtype_, Device::CPU);
+        jq::Tensor tensor = empty(shape, dtype_, Device::CPU);
+        DataPtr data_ptr = tensor.data_ptr();
 
-        //if(device_ == Device::CUDA) tensor.to(device);
+        // Fill elements out
+        int32_t num_elements = 1;
+        for(int i = 0; i < shape.size(); ++i){
+            num_elements *= shape[i];
+        }
+        // Todo handle types here. Is there a way to template this?
+        float* buf = static_cast<float*>(data_ptr.get());
+        for(int i = 0; i < num_elements; ++i){
+            buf[i] = dist(gen);
+        }
+
+        if(device_ == Device::CUDA) tensor.to(device_);
+
+        return tensor;
     }
 }
