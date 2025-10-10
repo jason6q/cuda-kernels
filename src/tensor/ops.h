@@ -6,10 +6,10 @@
  // Should I return a tensor?
  // Or a raw buffer and have that wrapped?
 
- #include "tensor.h"
+#include "tensor.h"
 
 namespace jqTen{
-    void matmul_naive(const Tensor& a, const Tensor& b){
+    Tensor matmul_naive(const Tensor& a, const Tensor& b){
         return;
     }
 }
