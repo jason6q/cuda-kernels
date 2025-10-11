@@ -1,8 +1,8 @@
 #include <iostream>
 #include <cuda_runtime.h>
 
-#include "tensor.h"
-#include "kernels.cuh"
+#include "tensor/tensor.h"
+#include "tensor/native/kernels.cuh"
 
 void test_matmul_naive(){
     jqTen::Tensor a = jqTen::random_uniform({10,10});

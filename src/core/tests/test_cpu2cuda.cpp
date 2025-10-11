@@ -2,9 +2,9 @@
 #include <vector>
 #include <cuda_runtime.h>
 
-#include "tensor.h"
-#include "device.h"
-#include "data_ptr.h"
+#include "core/device.h"
+#include "core/data_ptr.h"
+#include "tensor/tensor.h"
 
 int main(int argc, char* argv[]){
     std::vector<int32_t> shape = {10,10};

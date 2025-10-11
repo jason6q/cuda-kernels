@@ -1,9 +1,9 @@
 /**
  * Test all variants of matmul kernels here.
  */
-#include "tensor.h"
+#include "tensor/tensor.h"
 
-#include "ops.h"
+#include "tensor/ops.h"
 
 int main(int argc, char* argv[]){
     jqTen::Tensor a = jqTen::random_uniform({10,10});

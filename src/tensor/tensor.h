@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <optional>
 
-#include "data_ptr.h"
-#include "device.h"
+#include "core/data_ptr.h"
+#include "core/device.h"
 namespace jqTen{
     /**
      * Try to have this mimic the ATen Tensor minimally.

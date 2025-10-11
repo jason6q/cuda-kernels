@@ -1,13 +1,18 @@
 #include <vector>
 
-#include "macros.h"
-#include "ops.h"
-#include "tensor.h"
-#include "data_ptr.h"
-#include "kernels.cuh"
+#include "cuda_runtime.h"
 
+#include "core/data_ptr.h"
+#include "core/device.h"
+#include "tensor/macros.h"
+#include "tensor/ops.h"
+#include "tensor/tensor.h"
+#include "tensor/native/kernels.cuh"
 namespace jqTen{
     Tensor matmul_naive_cuda(const Tensor& a, const Tensor& b){
+        JQ_ASSERT(a.device() == core::Device::CUDA, "Tensor a device not CUDA");
+        JQ_ASSERT(b.device() == core::Device::CUDA, "Tensor b device not CUDA");
+
         auto a_buf = a.data();
         auto b_buf = b.data();
         std::vector<int32_t> a_shape = a.shape();

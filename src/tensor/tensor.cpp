@@ -5,10 +5,9 @@
 
 #include <cuda_runtime.h>
 
-#include "tensor.h"
-#include "data_ptr.h"
-#include "device.h"
-
+#include "core/data_ptr.h"
+#include "core/device.h"
+#include "tensor/tensor.h"
 namespace jqTen{
     size_t compute_nbytes(const std::vector<int32_t>& shape, core::DType dtype){
         // Calculate bytes

@@ -12,9 +12,7 @@ find_package(Torch REQUIRED)
 
 # Build lib
 set(INCLUDES_DIR 
-  src/core/
-  src/tensor/
-  src/tensor/native
+  src/
 ) 
 set(SOURCES
   src/core/data_ptr.cpp

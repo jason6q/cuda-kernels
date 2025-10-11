@@ -3,7 +3,7 @@
  */
 #include <cuda_runtime.h>
 
-#include "data_ptr.h"
+#include "core/data_ptr.h"
 
 int main(int argc, char* argv[]){
     size_t bytes = 1024 * sizeof(int64_t);
