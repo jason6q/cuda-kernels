@@ -11,10 +11,10 @@ int main(int argc, char* argv[]){
     jqTen::Tensor tensor = jqTen::empty(shape);
 
     tensor.to(core::Device::CUDA);
-    core::DataPtr data_ptr = tensor.data_ptr(); // WARNING: When you grab the data ptr it must be after the move to CUDA
+    float* data_ptr = static_cast<float*>(tensor.data()); // WARNING: When you grab the data ptr it must be after the move to CUDA
 
     cudaPointerAttributes attr;
-    cudaError_t err = cudaPointerGetAttributes(&attr, data_ptr.get());
+    cudaError_t err = cudaPointerGetAttributes(&attr, data_ptr);
     if(err != cudaSuccess){
         std::cerr << "Failed to get cuda attributes: " << cudaGetErrorString(err) << std::endl;
         return -1;

@@ -19,6 +19,7 @@ set(INCLUDES_DIR
 set(SOURCES
   src/core/data_ptr.cpp
   src/tensor/tensor.cpp
+  src/tensor/native/cuda/matmul_naive.cpp
 )
 add_library(jq_kernels SHARED ${SOURCES})
 target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})
@@ -29,6 +30,7 @@ set_property(TARGET jq_kernels PROPERTY POSITION_INDEPENDENT_CODE ON)
 file(GLOB TEST_SOURCES 
   src/core/tests/*.cpp
   src/tensor/tests/*.cpp
+  src/tensor/native/tests/*.cpp
 )
 foreach(test_src ${TEST_SOURCES})
   get_filename_component(test_name ${test_src} NAME_WE)

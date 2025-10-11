@@ -27,6 +27,8 @@ namespace core{
             void to(Device device);
 
             void* get(){ return ptr_.get(); }
+            const void* get() const { return ptr_.get(); }
+
             Device device(){ return device_; }
             std::size_t size(){ return size_; }
 

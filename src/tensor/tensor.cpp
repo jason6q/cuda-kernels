@@ -69,7 +69,7 @@ namespace jqTen{
         // We'll init a CPU tensor than move it to CUDA.
         // TODO: RNG on CUDA variant?
         jqTen::Tensor tensor = empty(shape, dtype_, core::Device::CPU);
-        core::DataPtr data_ptr = tensor.data_ptr();
+        auto buf_ptr = tensor.data();
 
         // Fill elements out
         int32_t num_elements = 1;
@@ -77,7 +77,7 @@ namespace jqTen{
             num_elements *= shape[i];
         }
         // Todo handle types here. Is there a way to template this?
-        float* buf = static_cast<float*>(data_ptr.get());
+        float* buf = static_cast<float*>(buf_ptr);
         for(int i = 0; i < num_elements; ++i){
             buf[i] = dist(gen);
         }

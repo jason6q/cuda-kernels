@@ -25,7 +25,9 @@ namespace jqTen{
             void to(core::Device device);
 
             // Getters
-            const core::DataPtr& data_ptr() const { return data_ptr_; }
+            void* data() { return data_ptr_.get(); }
+            const void* data() const {return data_ptr_.get(); }
+
             const std::vector<int32_t>& shape() const { return shape_; }
             core::DType dtype() const { return dtype_; }
             core::Device device() const { return device_; }
