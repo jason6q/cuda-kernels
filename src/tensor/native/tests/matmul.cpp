@@ -1,8 +1,9 @@
 /**
  * Test all variants of matmul kernels here.
  */
-#include "tensor/tensor.h"
 
+#include "core/device.h"
+#include "tensor/tensor.h"
 #include "tensor/ops.h"
 
 int main(int argc, char* argv[]){
