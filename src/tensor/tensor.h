@@ -27,6 +27,7 @@ namespace jqTen{
             // Getters
             void* data() { return data_ptr_.get(); }
             const void* data() const {return data_ptr_.get(); }
+            size_t nbytes() const { return nbytes_; }
 
             const std::vector<int32_t>& shape() const { return shape_; }
             core::DType dtype() const { return dtype_; }

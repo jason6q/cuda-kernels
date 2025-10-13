@@ -18,12 +18,18 @@ set(SOURCES
   src/
   src/core/data_ptr.cpp
   src/tensor/tensor.cpp
-  src/tensor/native/cuda/matmul_naive.cpp
+  src/tensor/native/matmul.cu
+  src/tensor/native/cuda/matmul_naive.cu
 )
 add_library(jq_kernels SHARED ${SOURCES})
 target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})
 target_link_libraries(jq_kernels PRIVATE ${TORCH_LIBRARIES} CUDA::cudart)
 set_property(TARGET jq_kernels PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_target_properties(jq_kernels PROPERTIES
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_RESOLVE_DEVICE_SYMBOLS ON
+  POSITION_INDEPENDENT_CODE ON
+)
 
 # Build tests
 file(GLOB TEST_SOURCES 
@@ -36,6 +42,11 @@ foreach(test_src ${TEST_SOURCES})
   add_executable(${test_name} ${test_src})
   target_link_libraries(${test_name} PRIVATE jq_kernels ${TORCH_LIBRARIES} CUDA::cudart)
   target_compile_features(${test_name} PRIVATE cxx_std_17)
+  set_target_properties(${test_name} PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
+    CUDA_RESOLVE_DEVICE_SYMBOLS ON
+    POSITION_INDEPENDENT_CODE ON
+  )
 
 endforeach()
 
