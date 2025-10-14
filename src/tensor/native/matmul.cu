@@ -27,6 +27,7 @@ namespace jqTen{
         // Calculate c output dim
         // Take a = {..., M, N}, b = {..., N, K}, c = {..., M, K}
         Tensor c = empty({m,k});
+        c.to(core::Device::CUDA);
 
         // TODO: Template the types here.
         // Allow this section of the code to handle different types.
