@@ -1,5 +1,5 @@
 /**
- * All supported operators. Strictly C++/Cuda no Torch API.
+ * All supported operators. Strictly C++/CUDA no Torch API.
  * 
  */
 
@@ -10,4 +10,5 @@
 
 namespace jqTen{
     Tensor matmul_naive_cuda(const Tensor& a, const Tensor& b);
+    Tensor arange_cuda(int32_t n);
 }

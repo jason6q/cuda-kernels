@@ -25,3 +25,6 @@ void launch_matmul_naive_backward(const scalar_t* grad_out, const scalar_t* a, c
 // scalar_tODO: Add specialization templates for brain float or half
 // template<>
 // __global__ void matmul_naive_kernel<__half>(__half ....)
+
+template <typename scalar_t>
+__global__ void arange_kernel(scalar_t* a, int32_t n);

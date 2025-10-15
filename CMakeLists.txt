@@ -19,7 +19,9 @@ set(SOURCES
   src/core/data_ptr.cpp
   src/tensor/tensor.cpp
   src/tensor/native/matmul.cu
+  src/tensor/native/arange.cu
   src/tensor/native/cuda/matmul_naive.cu
+  src/tensor/native/cuda/arange.cu
 )
 add_library(jq_kernels SHARED ${SOURCES})
 target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})

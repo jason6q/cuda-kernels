@@ -1,4 +1,3 @@
-
 template <typename scalar_t>
 __global__ void arange_kernel(scalar_t* a, int32_t n){
     int32_t i = blockIdx.x * blockDim.x + threadIdx.x;
