@@ -1,11 +1,18 @@
 cmake_minimum_required(VERSION 3.20)  # 3.30 fine too
 project(jq_kernels LANGUAGES CXX CUDA)
 
+# Options
+option(ENABLE_NVTX "Enable NVTX profiling" OFF)
+
 # Standards
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
+# Find NVTX
+find_package(CUDAToolkit REQUIRED)
+message(STATUS "CUDAToolkit_INCLUDE_DIRS = ${CUDAToolkit_INCLUDE_DIRS}")
 
 # Find Torch and CUDA runtime from Conda
 find_package(Torch REQUIRED)                   
@@ -25,6 +32,17 @@ set(SOURCES
 )
 add_library(jq_kernels SHARED ${SOURCES})
 target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})
+
+# Add NVTX if enabled
+if(ENABLE_NVTX)
+  target_include_directories(jq_kernels PRIVATE
+      ${CUDAToolkit_INCLUDE_DIRS}
+      ${CUDAToolkit_INCLUDE_DIRS}/nvtx3  # not strictly needed, for safety
+  )
+  target_link_libraries(jq_kernels PRIVATE ${CUDAToolkit_NVTX_LIBRARIES})
+  target_compile_definitions(jq_kernels PRIVATE ENABLE_NVTX=1)
+endif()
+
 target_link_libraries(jq_kernels PRIVATE ${TORCH_LIBRARIES} CUDA::cudart)
 set_property(TARGET jq_kernels PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_target_properties(jq_kernels PROPERTIES
@@ -49,6 +67,15 @@ foreach(test_src ${TEST_SOURCES})
     CUDA_RESOLVE_DEVICE_SYMBOLS ON
     POSITION_INDEPENDENT_CODE ON
   )
+  # Add NVTX if enabled
+  if(ENABLE_NVTX)
+    target_include_directories(${test_name} PRIVATE
+        ${CUDAToolkit_INCLUDE_DIRS}
+        ${CUDAToolkit_INCLUDE_DIRS}/nvtx3  # not strictly needed, for safety
+    )
+    target_link_libraries(${test_name} PRIVATE ${CUDAToolkit_NVTX_LIBRARIES})
+    target_compile_definitions(${test_name} PRIVATE ENABLE_NVTX=1)
+  endif()
 
 endforeach()
 

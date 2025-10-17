@@ -23,7 +23,6 @@ TODO: Add these dependencies
 ```
 DLPack
 CUTLASS
-NVTX
 CuDNN
 ```
 
