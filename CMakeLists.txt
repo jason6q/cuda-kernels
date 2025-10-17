@@ -12,7 +12,19 @@ set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 # Find NVTX
 find_package(CUDAToolkit REQUIRED)
-message(STATUS "CUDAToolkit_INCLUDE_DIRS = ${CUDAToolkit_INCLUDE_DIRS}")
+find_path(NVTX3_INCLUDE_DIR
+  NAMES nvtx3/nvtx3.hpp
+  HINTS
+    ${CUDAToolkit_INCLUDE_DIRS}
+    /usr/local/cuda/include
+    /opt/cuda/include
+)
+find_library(NVTOOLSEXT_LIB
+  NAMES nvToolsExt
+  HINTS ${CUDAToolkit_LIBRARY_DIR}
+        /usr/local/cuda/lib64 /usr/local/cuda-12.*/lib64 /opt/cuda/lib64)
+message("NVTX3_INCLUDE_DIR FOUND: ${NVTX3_INCLUDE_DIR}")
+message("NVTOOLSEXT_LIB FOUND: ${NVTOOLSEXT_LIB}")
 
 # Find Torch and CUDA runtime from Conda
 find_package(Torch REQUIRED)                   
@@ -32,16 +44,6 @@ set(SOURCES
 )
 add_library(jq_kernels SHARED ${SOURCES})
 target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})
-
-# Add NVTX if enabled
-if(ENABLE_NVTX)
-  target_include_directories(jq_kernels PRIVATE
-      ${CUDAToolkit_INCLUDE_DIRS}
-      ${CUDAToolkit_INCLUDE_DIRS}/nvtx3  # not strictly needed, for safety
-  )
-  target_link_libraries(jq_kernels PRIVATE ${CUDAToolkit_NVTX_LIBRARIES})
-  target_compile_definitions(jq_kernels PRIVATE ENABLE_NVTX=1)
-endif()
 
 target_link_libraries(jq_kernels PRIVATE ${TORCH_LIBRARIES} CUDA::cudart)
 set_property(TARGET jq_kernels PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -67,17 +69,40 @@ foreach(test_src ${TEST_SOURCES})
     CUDA_RESOLVE_DEVICE_SYMBOLS ON
     POSITION_INDEPENDENT_CODE ON
   )
-  # Add NVTX if enabled
-  if(ENABLE_NVTX)
-    target_include_directories(${test_name} PRIVATE
-        ${CUDAToolkit_INCLUDE_DIRS}
-        ${CUDAToolkit_INCLUDE_DIRS}/nvtx3  # not strictly needed, for safety
-    )
-    target_link_libraries(${test_name} PRIVATE ${CUDAToolkit_NVTX_LIBRARIES})
-    target_compile_definitions(${test_name} PRIVATE ENABLE_NVTX=1)
-  endif()
-
 endforeach()
+
+# Add NVTX
+if(ENABLE_NVTX AND NVTX3_INCLUDE_DIR AND NVTOOLSEXT_LIB)
+  add_library(nvtx_enable INTERFACE)
+  target_include_directories(nvtx_enable INTERFACE ${NVTX3_INCLUDE_DIR})
+  target_link_libraries      (nvtx_enable INTERFACE ${NVTOOLSEXT_LIB})
+  target_compile_definitions (nvtx_enable INTERFACE ENABLE_NVTX=1)
+
+  # attach to the lib
+  target_link_libraries(jq_kernels PRIVATE nvtx_enable)
+
+  # attach to each test target too
+  foreach(test_src ${TEST_SOURCES})
+    get_filename_component(test_name ${test_src} NAME_WE)
+    target_link_libraries(${test_name} PRIVATE nvtx_enable)
+  endforeach()
+endif()
+
+# For CUDA files only (nvcc host pass)
+#target_compile_options(jq_kernels PRIVATE
+#  $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-U_GNU_SOURCE>
+#  $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-U__USE_GNU>
+#)
+
+# If any test target compiles .cu files, apply the same lines to that target too.
+#foreach(test_src ${TEST_SOURCES})
+#  get_filename_component(test_name ${test_src} NAME_WE)
+#  # only needed if ${test_name} actually compiles any .cu
+#  target_compile_options(${test_name} PRIVATE
+#    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-U_GNU_SOURCE>
+#    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-U__USE_GNU>
+#  )
+#endforeach()
 
 # Torch libs live here:
 get_filename_component(TORCH_LIBDIR "${TORCH_LIBRARIES}" DIRECTORY)

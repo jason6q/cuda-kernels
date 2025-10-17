@@ -1,7 +1,7 @@
 /**
  * Basic test case to make sure nothing crashes.
  */
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 #include "core/data_ptr.h"
 

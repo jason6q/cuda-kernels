@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 #include "core/data_ptr.h"
 #include "core/device.h"

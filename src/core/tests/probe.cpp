@@ -1,4 +1,4 @@
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include <cstdio>
 int main() {
   int n=-1; auto e = cudaGetDeviceCount(&n);

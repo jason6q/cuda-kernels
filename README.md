@@ -86,3 +86,21 @@ Bunch of GEMMS
 Bunch of Convs
 Mixup
 TriMul from AlphaFold
+
+
+## Issues
+Compatibility issue with CUDA12.x headers and glibc 2.41 (Ubuntu 25.04)
+
+Local Patch:
+
+Edit `/usr/local/cuda/targets/x86-64-linux/include/crt/math_functions.h` and replace the lines with:
+```
+-extern __DEVICE_FUNCTIONS_DECL__ __device_builtin__ double sinpi(double x);
+-extern __DEVICE_FUNCTIONS_DECL__ __device_builtin__ float  sinpif(float x);
+-extern __DEVICE_FUNCTIONS_DECL__ __device_builtin__ double cospi(double x);
+-extern __DEVICE_FUNCTIONS_DECL__ __device_builtin__ float  cospif(float x);
++extern __DEVICE_FUNCTIONS_DECL__ __device_builtin__ double sinpi(double x) noexcept(true);
++extern __DEVICE_FUNCTIONS_DECL__ __device_builtin__ float  sinpif(float x) noexcept(true);
++extern __DEVICE_FUNCTIONS_DECL__ __device_builtin__ double cospi(double x) noexcept(true);
++extern __DEVICE_FUNCTIONS_DECL__ __device_builtin__ float  cospif(float x) noexcept(true);
+```

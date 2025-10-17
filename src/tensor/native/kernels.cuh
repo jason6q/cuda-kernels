@@ -4,8 +4,8 @@
  * scalar_this file should remain scalar_torch agnostic.
  */
 #pragma once
-#include <cuda_bf16.h>
-#include <cuda_fp16.h>
+//#include <cuda_bf16.h>
+//#include <cuda_fp16.h>
 
 template <typename scalar_t>
 __global__ void matmul_naive_kernel(const scalar_t* a, const scalar_t* b, scalar_t* c, int32_t m, int32_t k, int32_t n);

@@ -1,6 +1,5 @@
-#include <vector>
-
 #include "cuda_runtime.h"
+#include <vector>
 
 #include "core/data_ptr.h"
 #include "core/device.h"
