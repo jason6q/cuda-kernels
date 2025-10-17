@@ -31,16 +31,15 @@ find_package(Torch REQUIRED)
 
 # Build lib
 set(INCLUDES_DIR 
-  src/
+  ./
 ) 
 set(SOURCES
-  src/
-  src/core/data_ptr.cpp
-  src/tensor/tensor.cpp
-  src/tensor/native/matmul.cu
-  src/tensor/native/arange.cu
-  src/tensor/native/cuda/matmul_naive.cu
-  src/tensor/native/cuda/arange.cu
+  core/data_ptr.cpp
+  tensor/tensor.cpp
+  tensor/native/matmul.cu
+  tensor/native/arange.cu
+  tensor/native/cuda/matmul_naive.cu
+  tensor/native/cuda/arange.cu
 )
 add_library(jq_kernels SHARED ${SOURCES})
 target_include_directories(jq_kernels PUBLIC ${INCLUDES_DIR})
@@ -55,9 +54,9 @@ set_target_properties(jq_kernels PROPERTIES
 
 # Build tests
 file(GLOB TEST_SOURCES 
-  src/core/tests/*.cpp
-  src/tensor/tests/*.cpp
-  src/tensor/native/tests/*.cpp
+  core/tests/*.cpp
+  tensor/tests/*.cpp
+  tensor/native/tests/*.cpp
 )
 foreach(test_src ${TEST_SOURCES})
   get_filename_component(test_name ${test_src} NAME_WE)
@@ -87,22 +86,6 @@ if(ENABLE_NVTX AND NVTX3_INCLUDE_DIR AND NVTOOLSEXT_LIB)
     target_link_libraries(${test_name} PRIVATE nvtx_enable)
   endforeach()
 endif()
-
-# For CUDA files only (nvcc host pass)
-#target_compile_options(jq_kernels PRIVATE
-#  $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-U_GNU_SOURCE>
-#  $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-U__USE_GNU>
-#)
-
-# If any test target compiles .cu files, apply the same lines to that target too.
-#foreach(test_src ${TEST_SOURCES})
-#  get_filename_component(test_name ${test_src} NAME_WE)
-#  # only needed if ${test_name} actually compiles any .cu
-#  target_compile_options(${test_name} PRIVATE
-#    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-U_GNU_SOURCE>
-#    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-U__USE_GNU>
-#  )
-#endforeach()
 
 # Torch libs live here:
 get_filename_component(TORCH_LIBDIR "${TORCH_LIBRARIES}" DIRECTORY)
