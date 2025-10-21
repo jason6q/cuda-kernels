@@ -3,10 +3,13 @@ This is for profiling each of the different kernels.
 
 #### TODO:
 1. Incorporate warmup logic.
-2. Maybe write a few helper bash scripts for this.
-3. Parameter sweeping.
+2. Parameter sweeping.
 
-Just a few notes.
+
+Launch all test cases with nsys. Traces will be stored in this directory.
+```
+./launch_all_trace.sh ../../build/
+```
 
 Checking memory
 ```
