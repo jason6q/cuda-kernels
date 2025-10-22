@@ -12,9 +12,6 @@ int main(int argc, char* argv[]){
     b.to(core::Device::CUDA);
 
     jqTen::Tensor c = jqTen::matmul_naive_cuda(a, b);
-    a.print();
-    b.print();
-    c.print();
-
+    jqTen::Tensor d = jqTen::matmul_tile_cuda(a, b);
     return 0;
 }

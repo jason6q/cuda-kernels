@@ -28,12 +28,9 @@ namespace jqTen{
         float* c_buf = static_cast<float*>(c.data());
 
         // Kernel Launch
-        int32_t GRID_SIZE = 16;
-        int32_t BLOCK_SIZE = 16;
-        int32_t TILE_SIZE = BLOCK_SIZE;
-
-        dim3 gridDim(16,16);
-        dim3 blockDim(16,16); // Will be tile size
+        int32_t TILE_SIZE = 16;
+        dim3 gridDim((k-1) / TILE_SIZE + 1, (m-1) / TILE_SIZE + 1);
+        dim3 blockDim(TILE_SIZE,TILE_SIZE); // Will be tile size
 
         // SHMEM Size
         int32_t shmem_size = 2*TILE_SIZE*TILE_SIZE*sizeof(float);
@@ -63,8 +60,8 @@ namespace jqTen{
         float* c_buf = static_cast<float*>(c.data());
 
         // Kernel launch
-        dim3 blockDim = dim3(16,16);
         dim3 gridDim = dim3(16,16);
+        dim3 blockDim = dim3(16,16);
 
         // TODO: Specify templated scalar_t instead of just float.
         //       May need to make a similar macro like in torch.

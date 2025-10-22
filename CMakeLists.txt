@@ -39,6 +39,7 @@ set(SOURCES
   tensor/native/matmul.cu
   tensor/native/arange.cu
   tensor/native/cuda/matmul_naive.cu
+  tensor/native/cuda/matmul_tile.cu
   tensor/native/cuda/arange.cu
 )
 add_library(jq_kernels SHARED ${SOURCES})

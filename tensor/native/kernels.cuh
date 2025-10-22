@@ -17,13 +17,13 @@ template <typename scalar_t>
 __global__ void matmul_naive_gradB_kernel(const scalar_t* grad_out, const scalar_t* a, scalar_t* db, int m, int k, int n);
 
 template <typename scalar_t>
-__global__ void matmul_tile_kernel(const scalar_t* a, const scalar_t* b, scalar_t* c, int32_t m, int32_t k, int32_t n);
+__global__ void matmul_tile_kernel(const scalar_t* a, const scalar_t* b, scalar_t* c, int32_t m, int32_t k, int32_t n, int32_t tile_size);
 
 template <typename scalar_t>
-__global__ void matmul_tile_gradA_kernel(const scalar_t* grad_out, const scalar_t* b, scalar_t* da, int m, int k, int n);
+__global__ void matmul_tile_gradA_kernel(const scalar_t* grad_out, const scalar_t* b, scalar_t* da, int m, int k, int n, int32_t tile_size);
 
 template <typename scalar_t>
-__global__ void matmul_tile_gradB_kernel(const scalar_t* grad_out, const scalar_t* a, scalar_t* db, int m, int k, int n);
+__global__ void matmul_tile_gradB_kernel(const scalar_t* grad_out, const scalar_t* a, scalar_t* db, int m, int k, int n, int32_t tile_size);
 
 template <typename scalar_t>
 void launch_matmul_naive(const scalar_t* a, const scalar_t* b, scalar_t* c, cudaStream_t stream);
