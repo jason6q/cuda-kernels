@@ -1,6 +1,9 @@
 ## Profiling
 This is for profiling each of the different kernels.
 
+### Helpful Resources
+[NVTX Library](https://docs.nvidia.com/nsight-visual-studio-edition/5.3/Content/NVTX_Library.htm)
+
 #### TODO:
 1. Incorporate warmup logic.
 2. Parameter sweeping.
@@ -31,6 +34,5 @@ ncu --kernel-name "KERNEL" --set=full --replay-mode=kernel <KERNEL>
 
 PTX/SASS
 ```
-nvdisasm --print-line-info kernel.cubin | less
-cuobjdump --dup-sass KERNEL | less
+ cuobjdump --dup-sass KERNEL | less
 ```

@@ -80,6 +80,7 @@ See [PyTorch Custom Operators](https://docs.pytorch.org/tutorials/advanced/custo
 - [Pytorch C++ API](https://docs.pytorch.org/cppdocs/)
 - [Extension-CPP](https://github.com/pytorch/extension-cpp/tree/master)
 - [Getting Started with CuTe](https://docs.nvidia.com/cutlass/media/docs/cpp/cute/00_quickstart.html)
+- [The Jacobian for JVP and VJP](https://wangkuiyi.github.io/jacobian.html)
 
 # Implemented Kernels
 Bunch of GEMMS
