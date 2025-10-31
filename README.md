@@ -61,14 +61,15 @@ deviceQuery
 |Size of Memory| 48GB|
 
 ## Adding a new CUDA kernel
-Every kernel needs to have the following files created.
-```
-src/<KERNEL>.cu
-cu_tests/<KERNEL>.cpp
-torch_tests/<KERNEL>.py
-```
+Add the CUDA kernel code here: `tensor/native/cuda/<OP>.cu`
 
-You'll need to define the kernel prototypes in `includes/kernels.h`
+Add the Tensor interface to the CUDA Kernel (Launcher) here: `tensor/native/<OP>.cu`
+
+Add the test case here: `tensor/native/tests/<OP>.cpp`
+
+Register the Tensor interface operator to: `tensor/native/kernels.cuh`
+
+Finally, add the files to the `CMakeLists.txt`
 
 
 ## Creating a Custom C++/CUDA Extension for PyTorch
