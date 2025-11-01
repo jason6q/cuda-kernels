@@ -6,6 +6,11 @@ Most likely not as good as the kernels you find in cuDNN. This repo is primarily
 
 These kernels were developed on an RTX A6000.
 
+1. Add a kernel selector mechanism based off core::Device
+2. Add int8, bfloat16, float16 Dtype support
+3. Shape/View struct -> Building our way towards arbitrary shape support on the kernels.
+4. Singleton Dispatch table / Dispatch Keyset for op/device kernel lookup
+
 
 ## Environment Setup
 
@@ -83,11 +88,17 @@ See [PyTorch Custom Operators](https://docs.pytorch.org/tutorials/advanced/custo
 - [Getting Started with CuTe](https://docs.nvidia.com/cutlass/media/docs/cpp/cute/00_quickstart.html)
 - [The Jacobian for JVP and VJP](https://wangkuiyi.github.io/jacobian.html)
 
-# Implemented Kernels
+# Kernels
 Bunch of GEMMS
 Bunch of Convs
 Mixup
 TriMul from AlphaFold
+| Operator | CPU | CUDA | CUDA-CuTE
+| ----------- | ----------- |----|----|
+| arange |&#x2713;|&#x2713;|&#x2717;
+| matmul_naive|&#x2717;|&#x2713;|&#x2717;
+| matmul_tile|&#x2717;|&#x2713;|&#x2717;
+
 
 
 ## Issues
